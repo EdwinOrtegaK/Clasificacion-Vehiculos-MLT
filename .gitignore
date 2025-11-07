@@ -1,0 +1,60 @@
+# ---------------------------
+# Python
+# ---------------------------
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+*.egg
+*.log
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Cache
+.cache/
+*.pickle
+*.pkl
+
+# ---------------------------
+# OS Files
+# ---------------------------
+.DS_Store
+Thumbs.db
+
+# ---------------------------
+# VSCode
+# ---------------------------
+.vscode/
+
+# ---------------------------
+# Project-specific
+# ---------------------------
+
+# Results and experiments
+results/
+experiments/
+
+# Model weights
+*.pth
+*.pt
+
+# GradCAM images
+results/gradcam/
+
+# Plots and figures
+*.png
+*.jpg
+
+# ---------------------------
+# Kaggle / credentials
+# ---------------------------
+kaggle.json
+*.token
