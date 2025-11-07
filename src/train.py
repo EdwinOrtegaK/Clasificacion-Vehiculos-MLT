@@ -12,6 +12,9 @@ from utils import (
     plot_training_curves, compute_metrics
 )
 
+torch.backends.cuda.matmul.allow_tf32 = True
+torch.backends.cudnn.allow_tf32 = True
+
 # Configuración
 DATA_DIR = "data"  # contiene train/ validation/ test/
 EXPER_DIR = "experiments"
@@ -52,9 +55,9 @@ def build_dataloaders():
     class_names = get_class_names(train_ds)
     assert class_names == val_ds.classes == test_ds.classes, "Las clases deben coincidir en train/val/test"
 
-    train_loader = DataLoader(train_ds, batch_size=BATCH_SIZE, shuffle=True, num_workers=NUM_WORKERS)
-    val_loader   = DataLoader(val_ds, batch_size=BATCH_SIZE, shuffle=False, num_workers=NUM_WORKERS)
-    test_loader  = DataLoader(test_ds, batch_size=BATCH_SIZE, shuffle=False, num_workers=NUM_WORKERS)
+    train_loader = DataLoader(train_ds, batch_size=BATCH_SIZE, shuffle=True, num_workers=NUM_WORKERS, pin_memory=True)
+    val_loader   = DataLoader(val_ds, batch_size=BATCH_SIZE, shuffle=False, num_workers=NUM_WORKERS, pin_memory=True)
+    test_loader  = DataLoader(test_ds, batch_size=BATCH_SIZE, shuffle=False, num_workers=NUM_WORKERS, pin_memory=True)
     return train_loader, val_loader, test_loader, class_names
 
 def make_model(num_classes: int):
@@ -71,7 +74,8 @@ def train_one_epoch(model, loader, criterion, optimizer, device):
     model.train()
     loss_sum, correct, total = 0.0, 0, 0
     for x, y in loader:
-        x, y = x.to(device), y.to(device)
+        x = x.to(device, non_blocking=True)
+        y = y.to(device, non_blocking=True)
         optimizer.zero_grad(set_to_none=True)
         logits = model(x)
         loss = criterion(logits, y)
@@ -89,7 +93,8 @@ def evaluate(model, loader, criterion, device):
     loss_sum, correct, total = 0.0, 0, 0
     all_preds, all_true = [], []
     for x, y in loader:
-        x, y = x.to(device), y.to(device)
+        x = x.to(device, non_blocking=True)
+        y = y.to(device, non_blocking=True)
         logits = model(x)
         loss = criterion(logits, y)
         loss_sum += loss.item() * x.size(0)
@@ -112,6 +117,10 @@ def main():
 
     device = get_device()
     print(f"Device: {device}")
+
+    if device.type == "cuda":
+        print("GPU:", torch.cuda.get_device_name(0))
+        print("CUDA build:", torch.version.cuda)
 
     train_loader, val_loader, test_loader, class_names = build_dataloaders()
     save_json({"classes": class_names}, CLASSES_JSON)
