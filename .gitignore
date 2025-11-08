@@ -35,25 +35,6 @@ Thumbs.db
 .vscode/
 
 # ---------------------------
-# Project-specific
-# ---------------------------
-
-# Results and experiments
-results/
-experiments/
-
-# Model weights
-*.pth
-*.pt
-
-# GradCAM images
-results/gradcam/
-
-# Plots and figures
-*.png
-*.jpg
-
-# ---------------------------
 # Kaggle / credentials
 # ---------------------------
 kaggle.json
