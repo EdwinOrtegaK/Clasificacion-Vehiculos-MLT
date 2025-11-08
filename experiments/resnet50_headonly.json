@@ -1,0 +1,9 @@
+{
+  "model": "resnet50",
+  "freeze": "all_then_unfreeze_layer4",
+  "img_size": 224,
+  "batch_size": 32,
+  "epochs": 12,
+  "lr_head": 0.001,
+  "lr_unfreeze": 3e-05
+}

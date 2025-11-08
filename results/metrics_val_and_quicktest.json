@@ -1,0 +1,22 @@
+{
+  "config": {
+    "batch_size": 32,
+    "epochs": 12,
+    "head_only_epochs": 4,
+    "lr_head": 0.001,
+    "lr_unfreeze": 3e-05,
+    "img_size": 224,
+    "seed": 42
+  },
+  "val": {
+    "loss": 0.12007463809625299,
+    "accuracy": 0.9654940622899395,
+    "macro_f1": 0.9639742105897708
+  },
+  "test_quick": {
+    "loss": 0.1240180147757053,
+    "accuracy": 0.9596665770368379,
+    "macro_f1": 0.9581429009633409
+  },
+  "best_model_path": "results\\best_model.pth"
+}

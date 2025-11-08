@@ -1,0 +1,75 @@
+{
+  "Anti-aircraft": {
+    "precision": 0.9259259259259259,
+    "recall": 0.9643916913946587,
+    "f1-score": 0.9447674418604651,
+    "support": 337.0
+  },
+  "Armored combat support vehicles": {
+    "precision": 0.9058823529411765,
+    "recall": 0.9194029850746268,
+    "f1-score": 0.9125925925925926,
+    "support": 335.0
+  },
+  "Armored personnel carriers": {
+    "precision": 0.9637462235649547,
+    "recall": 0.9465875370919882,
+    "f1-score": 0.9550898203592815,
+    "support": 337.0
+  },
+  "Infantry fighting vehicles": {
+    "precision": 0.9545454545454546,
+    "recall": 0.9319526627218935,
+    "f1-score": 0.9431137724550899,
+    "support": 338.0
+  },
+  "Light armored vehicles": {
+    "precision": 0.9577039274924471,
+    "recall": 0.9323529411764706,
+    "f1-score": 0.9448584202682563,
+    "support": 340.0
+  },
+  "Mine-protected vehicles": {
+    "precision": 0.9627906976744186,
+    "recall": 0.9833729216152018,
+    "f1-score": 0.972972972972973,
+    "support": 421.0
+  },
+  "Prime movers and trucks": {
+    "precision": 0.965034965034965,
+    "recall": 0.9904306220095693,
+    "f1-score": 0.9775678866587958,
+    "support": 418.0
+  },
+  "Self-propelled artillery": {
+    "precision": 0.9783132530120482,
+    "recall": 0.9575471698113207,
+    "f1-score": 0.9678188319427891,
+    "support": 424.0
+  },
+  "light utility vehicles": {
+    "precision": 0.9798850574712644,
+    "recall": 0.9884057971014493,
+    "f1-score": 0.9841269841269841,
+    "support": 345.0
+  },
+  "tanks": {
+    "precision": 0.9903381642512077,
+    "recall": 0.9669811320754716,
+    "f1-score": 0.9785202863961814,
+    "support": 424.0
+  },
+  "accuracy": 0.9596665770368379,
+  "macro avg": {
+    "precision": 0.9584166021913862,
+    "recall": 0.958142546007265,
+    "f1-score": 0.9581429009633409,
+    "support": 3719.0
+  },
+  "weighted avg": {
+    "precision": 0.9599445674778889,
+    "recall": 0.9596665770368379,
+    "f1-score": 0.9596696229664243,
+    "support": 3719.0
+  }
+}
