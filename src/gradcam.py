@@ -4,6 +4,7 @@ from pathlib import Path
 from torchvision import datasets, transforms, models
 from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
+import torch.nn.functional as F
 from utils import (
     ensure_dir, get_device, load_json, denormalize_img
 )
@@ -31,37 +32,42 @@ class GradCAM:
 
     def _register_hooks(self):
         def fwd_hook(module, inp, out):
-            self.activations = out.detach()
+            # out: (N, C, H, W)
+            self.activations = out
 
         def bwd_hook(module, grad_in, grad_out):
-            self.gradients = grad_out[0].detach()
+            # grad_out[0]: (N, C, H, W)
+            self.gradients = grad_out[0]
 
         self.hook_handles.append(self.target_layer.register_forward_hook(fwd_hook))
-        self.hook_handles.append(self.target_layer.register_backward_hook(bwd_hook))
+        # usar full_backward_hook (el backward_hook clásico está deprecado)
+        self.hook_handles.append(self.target_layer.register_full_backward_hook(bwd_hook))
 
     def __call__(self, scores, class_idx):
-        # scores: tensor shape (N, num_classes)
+        # scores: (N, num_classes); class_idx: (N,)
         self.model.zero_grad(set_to_none=True)
-        loss = scores[:, class_idx].sum()
-        loss.backward(retain_graph=True)  # grads on last conv
+        # Selecciona el logit de la clase predicha por elemento y suma para backprop
+        loss = scores[torch.arange(scores.size(0)), class_idx].sum()
+        loss.backward(retain_graph=True)
 
-        grads = self.gradients           # (N, C, H, W)
-        acts = self.activations          # (N, C, H, W)
-        weights = grads.mean(dim=(2,3), keepdim=True)  # GAP sobre H,W
-        cam = (weights * acts).sum(dim=1, keepdim=True)  # (N,1,H,W)
-        cam = torch.relu(cam)
-        # normalizar por imagen
-        N, _, H, W = cam.shape
+        grads = self.gradients          # (N, C, H, W)
+        acts  = self.activations        # (N, C, H, W)
+        # pesos por GAP en H,W
+        weights = grads.mean(dim=(2,3), keepdim=True)            # (N, C, 1, 1)
+        cam = (weights * acts).sum(dim=1, keepdim=True).relu()   # (N, 1, H, W)
+
+        # normaliza por imagen a [0,1]
+        N = cam.size(0)
         cam = cam.view(N, -1)
-        cam = (cam - cam.min(dim=1, keepdim=True).values) / (cam.max(dim=1, keepdim=True).values - cam.min(dim=1, keepdim=True).values + 1e-8)
-        cam = cam.view(N, 1, H, W)
-        return cam  # [0,1]
+        cam = (cam - cam.min(dim=1, keepdim=True).values) / (
+              cam.max(dim=1, keepdim=True).values - cam.min(dim=1, keepdim=True).values + 1e-8)
+        cam = cam.view(N, 1, self.activations.shape[2], self.activations.shape[3])
+        return cam
 
     def remove_hooks(self):
         for h in self.hook_handles:
             h.remove()
 
-@torch.no_grad()
 def main():
     device = get_device()
     classes = load_json(CLASSES_JSON)["classes"]
@@ -95,6 +101,7 @@ def main():
 
         # generar CAM para la clase predicha
         cams = cam(scores, preds)  # (B,1,H,W) en [0,1]
+        cams = F.interpolate(cams, size=(x.size(2), x.size(3)), mode="bilinear", align_corners=False)  # (B,1,224,224)
 
         for i in range(x.size(0)):
             cls_name = classes[int(preds[i].item())]
@@ -102,11 +109,11 @@ def main():
                 continue
 
             img = denormalize_img(x[i])
-            heat = cams[i,0].detach().cpu().numpy()
-            heat = np.uint8(255 * heat)
-            heat = plt.cm.jet(heat)[:,:,:3]  # RGB
+            heat = cams[i, 0].detach().cpu().numpy()
+            heat_u8 = (heat * 255).astype(np.uint8)
+            heat_rgb = plt.cm.jet(heat_u8)[..., :3]
 
-            overlay = (0.6*img + 0.4*heat)
+            overlay = 0.6 * img + 0.4 * heat_rgb
             overlay = np.clip(overlay, 0, 1)
 
             out_path = os.path.join(OUT_DIR, f"{cls_name}_{saved_per_class[cls_name]+1}.png")
