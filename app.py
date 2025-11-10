@@ -125,12 +125,6 @@ with col_u:
     st.subheader("Sube una imagen")
     files = st.file_uploader("Formatos: JPG/PNG. Puedes subir varias.", type=["jpg", "jpeg", "png"], accept_multiple_files=True)
 
-with col_ex:
-    st.subheader("O usa un ejemplo")
-    if by_class:
-        st.write("Selecciona clase e imagen en la sidebar y presiona **Cargar ejemplo**.")
-    else:
-        st.caption("No se encontraron ejemplos en `data/samples/`.")
 
 images_to_run = []
 
